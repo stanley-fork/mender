@@ -580,8 +580,9 @@ public:
 				found_ones_ += std::count(start, start + result.value(), '1');
 
 				if ((result.value() == 0) && (found_ones_ != expected_ones_)) {
-					handler(expected::unexpected(
-						error::MakeError(error::GenericError, "ones mismatch")));
+					handler(
+						expected::unexpected(
+							error::MakeError(error::GenericError, "ones mismatch")));
 					return;
 				}
 

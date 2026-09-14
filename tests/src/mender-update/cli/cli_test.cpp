@@ -481,8 +481,9 @@ Installed and committed.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -541,8 +542,9 @@ Installed and committed.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -648,8 +650,9 @@ Installed and committed.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 DownloadWithFileSizes
 ArtifactInstall
 ArtifactCommit
@@ -715,8 +718,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -738,8 +742,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -804,8 +809,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -827,8 +833,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -899,8 +906,9 @@ Rolled back.
 			{"Process returned non-zero exit status: ArtifactInstall: Process exited with status 1"}));
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -973,8 +981,9 @@ System not modified.
 				"Update Module returned non-zero status: Process exited with status 1\n"));
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 Cleanup
 )"));
@@ -1040,8 +1049,9 @@ Rollback failed. System may be in an inconsistent state.
 )");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -1106,8 +1116,9 @@ Update Module does not support rollback. System may be in an inconsistent state.
 )");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactFailure
@@ -1233,8 +1244,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -1274,8 +1286,9 @@ exit 0
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -1336,8 +1349,9 @@ At least one payload requested a reboot of the device it updated.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -1401,8 +1415,9 @@ At least one payload requested a reboot of the device it updated.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -1467,8 +1482,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -1486,8 +1502,9 @@ ArtifactInstall
 			testing::EndsWith("Update already in progress. Please commit or roll back first\n"));
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -1548,8 +1565,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -1574,8 +1592,9 @@ ArtifactInstall
 				"Process returned non-zero exit status: ArtifactRollback: Process exited with status 1\n"));
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -1660,8 +1679,9 @@ Cleanup failed.
 				"Process returned non-zero exit status: Cleanup: Process exited with status 1\n"));
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -1728,8 +1748,9 @@ Rollback failed. System may be in an inconsistent state.
 )");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -1826,8 +1847,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -1849,8 +1871,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -1916,8 +1939,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -1946,8 +1970,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2015,8 +2040,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -2045,8 +2071,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -2134,8 +2161,9 @@ Installed and committed.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2201,8 +2229,9 @@ Streamed to storage, but not installed/enabled.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 )"));
 
@@ -2225,8 +2254,9 @@ Download
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 )"));
 
@@ -2248,8 +2278,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -2271,8 +2302,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2333,8 +2365,9 @@ Installed and committed.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2359,8 +2392,9 @@ ArtifactCommit
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2383,8 +2417,9 @@ ArtifactCommit
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2457,8 +2492,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -2482,8 +2518,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -2507,8 +2544,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2534,8 +2572,9 @@ ArtifactCommit
 		EXPECT_THAT(output.GetCerr(), testing::HasSubstr("ArtifactCommit_Leave_00"));
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2615,8 +2654,9 @@ Use 'commit' to update, or 'rollback' to roll back the update.
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -2640,8 +2680,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -2665,8 +2706,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2692,8 +2734,9 @@ ArtifactCommit
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactCommit
@@ -2765,8 +2808,9 @@ Installation failed.
 			output.GetCerr(), testing::HasSubstr("ArtifactInstall: Process exited with status 1"));
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -2790,8 +2834,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 )"));
@@ -2815,8 +2860,9 @@ ArtifactInstall
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -2842,8 +2888,9 @@ ArtifactRollback
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -2868,8 +2915,9 @@ ArtifactRollback
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -2896,8 +2944,9 @@ ArtifactFailure
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback
@@ -2921,8 +2970,9 @@ ArtifactFailure
 		EXPECT_EQ(output.GetCerr(), "");
 	}
 
-	EXPECT_TRUE(mtesting::FileContainsExactly(
-		path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
+	EXPECT_TRUE(
+		mtesting::FileContainsExactly(
+			path::Join(tmpdir.Path(), "call.log"), R"(ProvidePayloadFileSizes
 Download
 ArtifactInstall
 ArtifactRollback

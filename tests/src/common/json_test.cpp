@@ -360,6 +360,13 @@ TEST(JsonUtilTests, EscapeString) {
 
 	str = "A \"really\" bad\n\t combination";
 	EXPECT_EQ(json::EscapeString(str), R"(A \"really\" bad\n\t combination)");
+
+	// Every other control character must be escaped too, or the output is not JSON.
+	str = string("bell\a esc\x1b nul") + '\0';
+	EXPECT_EQ(json::EscapeString(str), R"(bell\u0007 esc\u001b nul\u0000)");
+
+	str = "back\\slash form\ffeed back\bspace";
+	EXPECT_EQ(json::EscapeString(str), R"(back\\slash form\ffeed back\bspace)");
 }
 
 TEST(Json, GetDouble) {

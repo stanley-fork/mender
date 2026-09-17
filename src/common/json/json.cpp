@@ -14,6 +14,7 @@
 
 #include <common/json.hpp>
 
+#include <cstdio>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -81,24 +82,46 @@ expected::expected<bool, error::Error> Json::Get<bool>() const {
 	return GetBool();
 }
 
-inline void StringReplaceAll(string &str, const string &what, const string &with) {
-	for (string::size_type pos {}; str.npos != (pos = str.find(what.data(), pos, what.length()));
-		 pos += with.length()) {
-		str.replace(pos, what.length(), with);
-	}
-}
-
 string EscapeString(const string &str) {
-	string ret {str};
+	string ret;
+	ret.reserve(str.size());
 
 	// see https://www.json.org/json-en.html
-	StringReplaceAll(ret, "\\", "\\\\");
-	StringReplaceAll(ret, "\"", "\\\"");
-	StringReplaceAll(ret, "\n", "\\n");
-	StringReplaceAll(ret, "\t", "\\t");
-	StringReplaceAll(ret, "\r", "\\r");
-	StringReplaceAll(ret, "\f", "\\f");
-	StringReplaceAll(ret, "\b", "\\b");
+	for (unsigned char c : str) {
+		switch (c) {
+		case '\\':
+			ret += "\\\\";
+			break;
+		case '"':
+			ret += "\\\"";
+			break;
+		case '\n':
+			ret += "\\n";
+			break;
+		case '\t':
+			ret += "\\t";
+			break;
+		case '\r':
+			ret += "\\r";
+			break;
+		case '\f':
+			ret += "\\f";
+			break;
+		case '\b':
+			ret += "\\b";
+			break;
+		default:
+			// JSON requires every U+0000..U+001F to be escaped; the ones without a
+			// short form above must use \u00XX.
+			if (c < 0x20) {
+				char buf[7];
+				snprintf(buf, sizeof(buf), "\\u%04x", c);
+				ret += buf;
+			} else {
+				ret += static_cast<char>(c);
+			}
+		}
+	}
 
 	return ret;
 }

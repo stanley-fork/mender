@@ -245,3 +245,13 @@ add_library(mender_http_resumer STATIC
 target_link_libraries(mender_http_resumer PUBLIC
   common_http
 )
+
+add_library(common_varlink STATIC platform/varlink/varlink.cpp platform/varlink/asio/varlink.cpp)
+target_compile_options(common_varlink PRIVATE ${PLATFORM_SPECIFIC_COMPILE_OPTIONS})
+target_link_libraries(common_varlink PUBLIC
+  common_error
+  common_events
+  common_json
+  common_log
+  common_path
+)

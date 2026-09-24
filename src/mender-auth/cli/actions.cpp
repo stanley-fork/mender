@@ -37,6 +37,7 @@ namespace cli {
 using namespace std;
 
 namespace auth_client = mender::auth::api::auth;
+namespace cfg_parser = mender::client_shared::config_parser;
 namespace events = mender::common::events;
 namespace http = mender::common::http;
 namespace log = mender::common::log;
@@ -138,8 +139,8 @@ error::Error DaemonAction::Execute(context::MenderContext &main_context) {
 	log::Info("Running mender-auth " + conf::kMenderVersion);
 
 	auto &config = main_context.GetConfig();
-	if (none_of(config.servers.cbegin(), config.servers.cend(), [](const string &it) {
-			return it != "";
+	if (none_of(config.servers.cbegin(), config.servers.cend(), [](const cfg_parser::Server &it) {
+			return it.url != "";
 		})) {
 		log::Error("Cannot run in daemon mode with no server URL specified");
 		return error::MakeError(error::ExitWithFailureError, "");

@@ -43,6 +43,7 @@ namespace http = mender::common::http;
 namespace device_tier = mender::common::device_tier;
 
 namespace conf = mender::client_shared::conf;
+namespace cfg_parser = mender::client_shared::config_parser;
 
 enum AuthClientErrorCode {
 	NoError = 0,
@@ -66,7 +67,7 @@ using APIResponseHandler = function<void(APIResponse)>;
 
 error::Error FetchJWTToken(
 	mender::common::http::Client &client,
-	const vector<string> &servers,
+	const vector<cfg_parser::Server> &servers,
 	const crypto::Args &args,
 	const string &device_identity_script_path,
 	APIResponseHandler api_handler,

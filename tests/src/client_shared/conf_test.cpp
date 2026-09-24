@@ -846,5 +846,5 @@ TEST(ConfTests, FallbackConfig) {
 	conf::MenderConfig config;
 	ASSERT_TRUE(config.ProcessCmdlineArgs(args.begin(), args.end(), conf::CliApp {}));
 	ASSERT_EQ(config.servers.size(), 1);
-	EXPECT_EQ(config.servers[0], "https://right-server.com");
+	EXPECT_EQ(config.servers[0].url, "https://right-server.com");
 }

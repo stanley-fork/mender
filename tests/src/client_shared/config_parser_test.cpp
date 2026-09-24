@@ -162,8 +162,8 @@ TEST_F(ConfigParserTests, LoadComplete) {
 	EXPECT_EQ(mc.artifact_verify_keys[2], "key3");
 
 	EXPECT_EQ(mc.servers.size(), 2);
-	EXPECT_EQ(mc.servers[0], "server1");
-	EXPECT_EQ(mc.servers[1], "server2");
+	EXPECT_EQ(mc.servers[0].url, "server1");
+	EXPECT_EQ(mc.servers[1].url, "server2");
 
 	EXPECT_EQ(mc.https_client.certificate, "Certificate_value");
 	EXPECT_EQ(mc.https_client.key, "Key_value");
@@ -213,7 +213,7 @@ TEST_F(ConfigParserTests, LoadPartial) {
 	EXPECT_EQ(mc.artifact_verify_keys[0], "ArtifactVerifyKey_value");
 
 	EXPECT_EQ(mc.servers.size(), 1);
-	EXPECT_EQ(mc.servers[0], "ServerURL_value");
+	EXPECT_EQ(mc.servers[0].url, "ServerURL_value");
 
 	EXPECT_EQ(mc.https_client.certificate, "");
 	EXPECT_EQ(mc.https_client.key, "");
@@ -280,8 +280,8 @@ TEST_F(ConfigParserTests, LoadOverrides) {
 	EXPECT_EQ(mc.artifact_verify_keys[2], "key3");
 
 	EXPECT_EQ(mc.servers.size(), 2);
-	EXPECT_EQ(mc.servers[0], "server1");
-	EXPECT_EQ(mc.servers[1], "server2");
+	EXPECT_EQ(mc.servers[0].url, "server1");
+	EXPECT_EQ(mc.servers[1].url, "server2");
 
 	EXPECT_EQ(mc.https_client.certificate, "Certificate_value2");
 	EXPECT_EQ(mc.https_client.key, "Key_value");
@@ -335,8 +335,8 @@ TEST_F(ConfigParserTests, LoadNoOverrides) {
 	EXPECT_EQ(mc.artifact_verify_keys[2], "key3");
 
 	EXPECT_EQ(mc.servers.size(), 2);
-	EXPECT_EQ(mc.servers[0], "server1");
-	EXPECT_EQ(mc.servers[1], "server2");
+	EXPECT_EQ(mc.servers[0].url, "server1");
+	EXPECT_EQ(mc.servers[1].url, "server2");
 
 	EXPECT_EQ(mc.https_client.certificate, "Certificate_value");
 	EXPECT_EQ(mc.https_client.key, "Key_value");
@@ -390,8 +390,8 @@ TEST_F(ConfigParserTests, LoadInvalidOverrides) {
 	EXPECT_EQ(mc.artifact_verify_keys[2], "key3");
 
 	EXPECT_EQ(mc.servers.size(), 2);
-	EXPECT_EQ(mc.servers[0], "server1");
-	EXPECT_EQ(mc.servers[1], "server2");
+	EXPECT_EQ(mc.servers[0].url, "server1");
+	EXPECT_EQ(mc.servers[1].url, "server2");
 
 	EXPECT_EQ(mc.https_client.certificate, "Certificate_value");
 	EXPECT_EQ(mc.https_client.key, "Key_value");
@@ -453,8 +453,8 @@ TEST_F(ConfigParserTests, LoadOverridesExtra) {
 	EXPECT_EQ(mc.artifact_verify_keys[2], "key3");
 
 	EXPECT_EQ(mc.servers.size(), 2);
-	EXPECT_EQ(mc.servers[0], "server1");
-	EXPECT_EQ(mc.servers[1], "server2");
+	EXPECT_EQ(mc.servers[0].url, "server1");
+	EXPECT_EQ(mc.servers[1].url, "server2");
 
 	EXPECT_EQ(mc.https_client.certificate, "Certificate_value");
 	EXPECT_EQ(mc.https_client.key, "Key_value");
@@ -516,7 +516,7 @@ TEST_F(ConfigParserTests, LoadOverridesExtraArrayItems) {
 	EXPECT_EQ(mc.artifact_verify_keys[1], "key5");
 
 	EXPECT_EQ(mc.servers.size(), 1);
-	EXPECT_EQ(mc.servers[0], "server3");
+	EXPECT_EQ(mc.servers[0].url, "server3");
 
 	EXPECT_EQ(mc.https_client.certificate, "Certificate_value");
 	EXPECT_EQ(mc.https_client.key, "Key_value");
@@ -615,6 +615,37 @@ TEST_F(ConfigParserTests, ValidateServerConfig) {
 	EXPECT_THAT(ret.error().String(), testing::HasSubstr("Servers"));
 }
 
+TEST_F(ConfigParserTests, ServersTenantToken) {
+	ofstream os(test_config_fname);
+	os << R"({
+  "TenantToken": "TenantToken_value",
+  "Servers": [
+    {"ServerURL": "server1", "TenantToken": "token1"},
+    {"ServerURL": "server1", "TenantToken": "token2"},
+    {"ServerURL": "server1", "TenantToken": "token2"},
+    {"ServerURL": "server2"},
+    {"ServerURL": "server2"}
+  ]
+})";
+	os.close();
+
+	config_parser::MenderConfigFromFile mc;
+	config_parser::ExpectedBool ret = mc.LoadFile(test_config_fname);
+	ASSERT_TRUE(ret) << ret.error().String();
+	EXPECT_TRUE(ret.value());
+
+	EXPECT_EQ(mc.tenant_token, "TenantToken_value");
+
+	// Same URL with different tenant tokens is kept, exact duplicates are not.
+	ASSERT_EQ(mc.servers.size(), 3);
+	EXPECT_EQ(mc.servers[0].url, "server1");
+	EXPECT_EQ(mc.servers[0].tenant_token, "token1");
+	EXPECT_EQ(mc.servers[1].url, "server1");
+	EXPECT_EQ(mc.servers[1].tenant_token, "token2");
+	EXPECT_EQ(mc.servers[2].url, "server2");
+	EXPECT_EQ(mc.servers[2].tenant_token, "");
+}
+
 TEST_F(ConfigParserTests, CaseInsensitiveParsing) {
 	ofstream os(test_config_fname);
 	os << R"({
@@ -635,7 +666,7 @@ TEST_F(ConfigParserTests, CaseInsensitiveParsing) {
 	EXPECT_EQ(mc.device_type_file, "DeviceTypeFile_value");
 
 	ASSERT_EQ(mc.servers.size(), 1);
-	EXPECT_EQ(mc.servers[0], "ServerURL_value");
+	EXPECT_EQ(mc.servers[0].url, "ServerURL_value");
 }
 
 TEST_F(ConfigParserTests, CaseInsensitiveCollision) {
@@ -654,7 +685,7 @@ TEST_F(ConfigParserTests, CaseInsensitiveCollision) {
 	ASSERT_TRUE(ret.value());
 
 	ASSERT_EQ(mc.servers.size(), 1);
-	EXPECT_EQ(mc.servers[0], "ServerURL_value_4");
+	EXPECT_EQ(mc.servers[0].url, "ServerURL_value_4");
 }
 
 TEST_F(ConfigParserTests, DeviceTierMicroConfiguration) {

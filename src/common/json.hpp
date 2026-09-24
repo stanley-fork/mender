@@ -17,9 +17,10 @@
 
 #include <common/config.h>
 
-#include <string>
 #include <map>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <common/common.hpp>
 #include <common/error.hpp>
@@ -101,6 +102,33 @@ public:
 	using ExpectedChildrenMap = expected::expected<ChildrenMap, error::Error>;
 
 	Json() = default;
+
+	// Builds an object or array incrementally, for output that mixes strings,
+	// numbers and bools (Dump() of a KeyValueMap only takes strings). Use
+	// Dump(-1) for the compact form. Keys dump sorted, not in Set() order.
+	// Append() requires an array, Set() an object; a default-constructed Json
+	// becomes an array on the first Append(), an object on the first Set().
+	// Anything else returns a TypeError.
+	static Json Object(const unordered_map<string, string> &members = {});
+	static Json Array();
+	error::Error Append(const Json &value);
+	error::Error Set(const string &key, const string &value);
+	error::Error Set(const string &key, const char *value) {
+		return Set(key, string(value));
+	}
+	error::Error Set(const string &key, int64_t value);
+	error::Error Set(const string &key, bool value);
+	error::Error Set(const string &key, const Json &value);
+	error::Error Set(const string &key, const vector<string> &value);
+	// Catch-all for other integral types, so `Set(key, 3)` is neither ambiguous
+	// nor silently a bool.
+	template <typename T>
+	typename enable_if<
+		is_integral<T>::value and not is_same<T, int64_t>::value and not is_same<T, bool>::value,
+		error::Error>::type
+	Set(const string &key, T value) {
+		return Set(key, static_cast<int64_t>(value));
+	}
 
 	string Dump(const int indent = 2) const;
 

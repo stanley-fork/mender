@@ -127,6 +127,16 @@ if(MENDER_USE_DBUS)
   add_dependencies(tests dbus_test)
 endif()
 
+add_executable(varlink_test EXCLUDE_FROM_ALL platform/varlink_test.cpp)
+target_compile_options(varlink_test PRIVATE ${PLATFORM_SPECIFIC_COMPILE_OPTIONS})
+target_link_libraries(varlink_test PUBLIC
+  common_varlink
+  common_testing
+  main_test
+)
+gtest_discover_tests(varlink_test ${MENDER_TEST_FLAGS} NO_PRETTY_VALUES)
+add_dependencies(tests varlink_test)
+
 add_subdirectory(http_resumer)
 
 add_executable(path_test EXCLUDE_FROM_ALL path_test.cpp)

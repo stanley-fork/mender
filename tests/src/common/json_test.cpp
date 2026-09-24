@@ -360,6 +360,63 @@ TEST(JsonUtilTests, EscapeString) {
 
 	str = "A \"really\" bad\n\t combination";
 	EXPECT_EQ(json::EscapeString(str), R"(A \"really\" bad\n\t combination)");
+
+	// Every other control character must be escaped too, or the output is not JSON.
+	str = string("bell\a esc\x1b nul") + '\0';
+	EXPECT_EQ(json::EscapeString(str), R"(bell\u0007 esc\u001b nul\u0000)");
+
+	str = "back\\slash form\ffeed back\bspace";
+	EXPECT_EQ(json::EscapeString(str), R"(back\\slash form\ffeed back\bspace)");
+}
+
+TEST(Json, ObjectBuilder) {
+	auto nested = json::Json::Object();
+	nested.Set("inner", true);
+	auto j = json::Json::Object();
+	j.Set("str", "text");
+	j.Set("num", 42);
+	j.Set("big", int64_t(-1));
+	j.Set("flag", false);
+	j.Set("list", vector<string> {"a", "b"});
+	j.Set("obj", nested);
+	EXPECT_EQ(
+		j.Dump(-1),
+		R"({"big":-1,"flag":false,"list":["a","b"],"num":42,"obj":{"inner":true},"str":"text"})");
+	EXPECT_EQ(json::Json::Object().Dump(-1), "{}");
+	EXPECT_EQ(json::Json::Array().Dump(-1), "[]");
+	auto n1 = json::Json::Object();
+	n1.Set("n", 1);
+	auto arr = json::Json::Array();
+	arr.Append(nested);
+	arr.Append(n1);
+	EXPECT_EQ(arr.Dump(-1), R"([{"inner":true},{"n":1}])");
+
+	// Set on a fresh Json makes it an object; Get sees the typed values.
+	json::Json plain;
+	plain.Set("n", size_t(7));
+	EXPECT_TRUE(plain.IsObject());
+	EXPECT_EQ(plain.Get("n").value().Get<int64_t>().value(), 7);
+	EXPECT_TRUE(j.Get("flag").value().IsBool());
+	EXPECT_TRUE(j.Get("str").value().IsString());
+
+	// The wrong container type is an error, not a throw.
+	auto type_error = json::MakeError(json::JsonErrorCode::TypeError, "").code;
+	EXPECT_EQ(arr.Set("k", 1).code, type_error);
+	EXPECT_EQ(j.Append(nested).code, type_error);
+}
+
+TEST(Json, DumpReplacesInvalidUtf8) {
+	// Literals split so "\xff" and "b" are not read as one hex escape.
+	auto j = json::Json::Object();
+	j.Set(
+		"k",
+		string(
+			"a\xff"
+			"b"));
+	EXPECT_EQ(
+		j.Dump(-1),
+		"{\"k\":\"a\xEF\xBF\xBD"
+		"b\"}");
 }
 
 TEST(Json, GetDouble) {

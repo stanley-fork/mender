@@ -111,7 +111,54 @@ ExpectedJson Load(io::Reader &reader) {
 }
 
 string Json::Dump(const int indent) const {
-	return this->n_json.dump(indent);
+	// Strings from scripts and the server are not guaranteed to be UTF-8; emit
+	// U+FFFD for the bad bytes instead of throwing.
+	return this->n_json.dump(indent, ' ', false, insensitive_json::error_handler_t::replace);
+}
+
+Json Json::Object(const unordered_map<string, string> &members) {
+	return Json(insensitive_json(members));
+}
+
+Json Json::Array() {
+	return Json(insensitive_json::array());
+}
+
+error::Error Json::Append(const Json &value) {
+	if (!this->n_json.is_null() && !this->n_json.is_array()) {
+		return MakeError(JsonErrorCode::TypeError, "Invalid JSON type to append to");
+	}
+	this->n_json.push_back(value.n_json);
+	return error::NoError;
+}
+
+template <typename T>
+static error::Error SetMember(insensitive_json &n_json, const string &key, const T &value) {
+	if (!n_json.is_null() && !n_json.is_object()) {
+		return MakeError(JsonErrorCode::TypeError, "Invalid JSON type to set '" + key + "' on");
+	}
+	n_json[key] = value;
+	return error::NoError;
+}
+
+error::Error Json::Set(const string &key, const string &value) {
+	return SetMember(this->n_json, key, value);
+}
+
+error::Error Json::Set(const string &key, int64_t value) {
+	return SetMember(this->n_json, key, value);
+}
+
+error::Error Json::Set(const string &key, bool value) {
+	return SetMember(this->n_json, key, value);
+}
+
+error::Error Json::Set(const string &key, const Json &value) {
+	return SetMember(this->n_json, key, value.n_json);
+}
+
+error::Error Json::Set(const string &key, const vector<string> &value) {
+	return SetMember(this->n_json, key, value);
 }
 
 ExpectedJson Json::Get(const char *child_key) const {

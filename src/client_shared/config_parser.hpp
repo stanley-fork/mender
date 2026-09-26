@@ -47,6 +47,17 @@ struct ClientSecurity {
 	string ssl_engine;
 };
 
+/** Server entry from the `Servers` list. The tenant token, if set, overrides the global
+	`TenantToken` when authenticating with this server. */
+struct Server {
+	string url;
+	string tenant_token;
+
+	bool operator==(const Server &other) const {
+		return url == other.url && tenant_token == other.tenant_token;
+	}
+};
+
 /** Connectivity parameters. This option was removed in Mender 	v4.0.0, where we don't make use
 	of HTTP Keep-Alive so there is no need to disable it or configure it. */
 // struct ClientConnectivity {
@@ -172,7 +183,7 @@ public:
 	string device_tier = device_tier::kStandard;
 
 	/** List of available servers, to which client can fall over */
-	vector<string> servers;
+	vector<Server> servers;
 
 	/** Log level which takes effect right before daemon startup */
 	string daemon_log_level;

@@ -78,16 +78,16 @@ error::Error MakeHTTPResponseError(
 }
 
 static void TryAuthenticate(
-	vector<string>::const_iterator server_it,
-	vector<string>::const_iterator end,
+	vector<cfg_parser::Server>::const_iterator server_it,
+	vector<cfg_parser::Server>::const_iterator end,
 	mender::common::http::Client &client,
-	const string request_body,
-	const string signature,
+	const unordered_map<string, string> &request_body_map,
+	const crypto::Args &crypto_args,
 	APIResponseHandler api_handler);
 
 error::Error FetchJWTToken(
 	mender::common::http::Client &client,
-	const vector<string> &servers,
+	const vector<cfg_parser::Server> &servers,
 	const crypto::Args &crypto_args,
 	const string &device_identity_script_path,
 	APIResponseHandler api_handler,
@@ -119,31 +119,19 @@ error::Error FetchJWTToken(
 	}
 	request_body_map.insert({"pubkey", expected_public_key.value()});
 
-	auto expected_request_body = json::Dump(request_body_map);
-	if (!expected_request_body) {
-		return expected_request_body.error();
-	}
-	auto request_body = expected_request_body.value();
-
-	// Sign the body
-	auto expected_signature = crypto::Sign(crypto_args, common::ByteVectorFromString(request_body));
-	if (!expected_signature) {
-		return expected_signature.error();
-	}
-	auto signature = expected_signature.value();
-
 	// TryAuthenticate() calls the handler on any potential further errors, we
 	// are done here with no errors.
-	TryAuthenticate(servers.cbegin(), servers.cend(), client, request_body, signature, api_handler);
+	TryAuthenticate(
+		servers.cbegin(), servers.cend(), client, request_body_map, crypto_args, api_handler);
 	return error::NoError;
 }
 
 static void TryAuthenticate(
-	vector<string>::const_iterator server_it,
-	vector<string>::const_iterator end,
+	vector<cfg_parser::Server>::const_iterator server_it,
+	vector<cfg_parser::Server>::const_iterator end,
 	mender::common::http::Client &client,
-	const string request_body,
-	const string signature,
+	const unordered_map<string, string> &request_body_map,
+	const crypto::Args &crypto_args,
 	APIResponseHandler api_handler) {
 	if (server_it == end) {
 		auto err = MakeError(AuthenticationError, "No more servers to try for authentication");
@@ -151,7 +139,27 @@ static void TryAuthenticate(
 		return;
 	}
 
-	auto whole_url = mender::common::http::JoinUrl(*server_it, request_uri);
+	auto server_body_map = request_body_map;
+	if (!server_it->tenant_token.empty()) {
+		server_body_map["tenant_token"] = server_it->tenant_token;
+	}
+
+	auto expected_request_body = json::Dump(server_body_map);
+	if (!expected_request_body) {
+		api_handler(expected::unexpected(expected_request_body.error()));
+		return;
+	}
+	auto request_body = expected_request_body.value();
+
+	// Sign the body
+	auto expected_signature = crypto::Sign(crypto_args, common::ByteVectorFromString(request_body));
+	if (!expected_signature) {
+		api_handler(expected::unexpected(expected_signature.error()));
+		return;
+	}
+	auto signature = expected_signature.value();
+
+	auto whole_url = mender::common::http::JoinUrl(server_it->url, request_uri);
 	auto req = make_shared<mender::common::http::OutgoingRequest>();
 	req->SetMethod(mender::common::http::Method::POST);
 	req->SetAddress(whole_url);
@@ -169,14 +177,14 @@ static void TryAuthenticate(
 
 	auto err = client.AsyncCall(
 		req,
-		[received_body, server_it, end, &client, request_body, signature, api_handler](
+		[received_body, server_it, end, &client, request_body_map, crypto_args, api_handler](
 			mender::common::http::ExpectedIncomingResponsePtr exp_resp) {
 			if (!exp_resp) {
 				mlog::Info(
-					"Authentication error trying server '" + *server_it
+					"Authentication error trying server '" + server_it->url
 					+ "': " + exp_resp.error().String());
 				TryAuthenticate(
-					std::next(server_it), end, client, request_body, signature, api_handler);
+					std::next(server_it), end, client, request_body_map, crypto_args, api_handler);
 				return;
 			}
 			auto resp = exp_resp.value();
@@ -189,14 +197,14 @@ static void TryAuthenticate(
 			mlog::Debug("Status code:" + to_string(resp->GetStatusCode()));
 			mlog::Debug("Status message: " + resp->GetStatusMessage());
 		},
-		[received_body, server_it, end, &client, request_body, signature, api_handler](
+		[received_body, server_it, end, &client, request_body_map, crypto_args, api_handler](
 			mender::common::http::ExpectedIncomingResponsePtr exp_resp) {
 			if (!exp_resp) {
 				mlog::Info(
-					"Authentication error trying server '" + *server_it
+					"Authentication error trying server '" + server_it->url
 					+ "': " + exp_resp.error().String());
 				TryAuthenticate(
-					std::next(server_it), end, client, request_body, signature, api_handler);
+					std::next(server_it), end, client, request_body_map, crypto_args, api_handler);
 				return;
 			}
 			auto resp = exp_resp.value();
@@ -206,32 +214,32 @@ static void TryAuthenticate(
 			error::Error err;
 			switch (resp->GetStatusCode()) {
 			case mender::common::http::StatusOK:
-				api_handler(AuthData {*server_it, response_body});
+				api_handler(AuthData {server_it->url, response_body});
 				return;
 			case mender::common::http::StatusUnauthorized:
 				err = MakeHTTPResponseError(
 					UnauthorizedError, resp, response_body, "Failed to authorize with the server.");
 				mlog::Info(
-					"Authentication error trying server '" + *server_it + "': " + err.String());
+					"Authentication error trying server '" + server_it->url + "': " + err.String());
 				TryAuthenticate(
-					std::next(server_it), end, client, request_body, signature, api_handler);
+					std::next(server_it), end, client, request_body_map, crypto_args, api_handler);
 				return;
 			case mender::common::http::StatusBadRequest:
 			case mender::common::http::StatusInternalServerError:
 				err = MakeHTTPResponseError(
 					APIError, resp, response_body, "Failed to authorize with the server.");
 				mlog::Info(
-					"Authentication error trying server '" + *server_it + "': " + err.String());
+					"Authentication error trying server '" + server_it->url + "': " + err.String());
 				TryAuthenticate(
-					std::next(server_it), end, client, request_body, signature, api_handler);
+					std::next(server_it), end, client, request_body_map, crypto_args, api_handler);
 				return;
 			default:
 				err =
 					MakeError(ResponseError, "Unexpected error code: " + resp->GetStatusMessage());
 				mlog::Info(
-					"Authentication error trying server '" + *server_it + "': " + err.String());
+					"Authentication error trying server '" + server_it->url + "': " + err.String());
 				TryAuthenticate(
-					std::next(server_it), end, client, request_body, signature, api_handler);
+					std::next(server_it), end, client, request_body_map, crypto_args, api_handler);
 				return;
 			}
 		});

@@ -281,7 +281,12 @@ ExpectedBool MenderConfigFromFile::LoadFile(const string &path) {
 					if (e_item_json) {
 						const json::ExpectedString e_item_string = e_item_json.value().GetString();
 						if (e_item_string) {
-							const string item_value = e_item_string.value();
+							Server item_value {
+								e_item_string.value(),
+								e_array_item.value()
+									.Get("TenantToken")
+									.and_then(json::ToString)
+									.value_or("")};
 							if (count(this->servers.begin(), this->servers.end(), item_value)
 								== 0) {
 								this->servers.push_back(std::move(item_value));
@@ -308,7 +313,7 @@ ExpectedBool MenderConfigFromFile::LoadFile(const string &path) {
 			}
 			assert(servers.size() <= 1);
 			this->servers.clear();
-			this->servers.push_back(e_cfg_string.value());
+			this->servers.push_back({e_cfg_string.value(), ""});
 			applied = true;
 		}
 	}

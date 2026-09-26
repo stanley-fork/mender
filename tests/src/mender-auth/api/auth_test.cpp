@@ -40,6 +40,7 @@ namespace path = mender::common::path;
 namespace mtesting = mender::common::testing;
 
 namespace auth = mender::auth::api::auth;
+namespace config_parser = mender::client_shared::config_parser;
 
 using TestEventLoop = mender::common::testing::TestEventLoop;
 namespace device_tier = mender::common::device_tier;
@@ -109,12 +110,12 @@ TEST_F(AuthTests, FetchJWTTokenBasicTest) {
 	http::ClientConfig client_config {server_certificate_path};
 	http::Client client {client_config, loop};
 
-	vector<string> servers {server_url};
+	vector<config_parser::Server> servers {{server_url, ""}};
 	auth::APIResponseHandler handle_jwt_token_callback =
 		[&loop, JWT_TOKEN, &servers](auth::APIResponse resp) {
 			ASSERT_TRUE(resp);
 			EXPECT_EQ(resp.value().token, JWT_TOKEN);
-			EXPECT_EQ(resp.value().server_url, servers[0]);
+			EXPECT_EQ(resp.value().server_url, servers[0].url);
 			loop.Stop();
 		};
 	auto err = auth::FetchJWTToken(
@@ -187,7 +188,8 @@ TEST_F(AuthTests, FetchJWTTokenFailoverTest) {
 	http::Client client {client_config, loop};
 
 	const string no_server_url {"http://127.0.0.1:" + TEST_PORT2};
-	vector<string> servers {no_server_url, failing_server_url, working_server_url};
+	vector<config_parser::Server> servers {
+		{no_server_url, ""}, {failing_server_url, ""}, {working_server_url, ""}};
 	auth::APIResponseHandler handle_jwt_token_callback =
 		[&loop, JWT_TOKEN, working_server_url](auth::APIResponse resp) {
 			ASSERT_TRUE(resp);
@@ -241,7 +243,7 @@ TEST_F(AuthTests, FetchJWTTokenFailTest) {
 	http::Client client {client_config, loop};
 
 	const string no_server_url {"http://127.0.0.1:" + TEST_PORT2};
-	vector<string> servers {no_server_url, failing_server_url};
+	vector<config_parser::Server> servers {{no_server_url, ""}, {failing_server_url, ""}};
 	auth::APIResponseHandler handle_jwt_token_callback = [&loop](auth::APIResponse resp) {
 		loop.Stop();
 		ASSERT_FALSE(resp);
@@ -258,6 +260,94 @@ TEST_F(AuthTests, FetchJWTTokenFailTest) {
 	loop.Run();
 
 	ASSERT_EQ(err, error::NoError) << "Unexpected error: " << err.message;
+}
+
+TEST_F(AuthTests, FetchJWTTokenServerTenantTokenFailover) {
+	const string JWT_TOKEN = "FOOBARJWTTOKEN";
+
+	TestEventLoop loop;
+
+	// One server with two tenants, the device is only accepted in "tenant_b".
+	const string server_url {"http://127.0.0.1:" + TEST_PORT};
+	auto request_bodies = make_shared<vector<shared_ptr<vector<uint8_t>>>>();
+	vector<string> received_tokens;
+	vector<string> received_signatures;
+	http::ServerConfig server_config;
+	http::Server server(server_config, loop);
+	server.AsyncServeUrl(
+		server_url,
+		[request_bodies](http::ExpectedIncomingRequestPtr exp_req) {
+			ASSERT_TRUE(exp_req) << exp_req.error().String();
+			request_bodies->push_back(make_shared<vector<uint8_t>>());
+			auto body_writer = make_shared<io::ByteWriter>(request_bodies->back());
+			body_writer->SetUnlimited(true);
+			exp_req.value()->SetBodyWriter(body_writer);
+		},
+		[JWT_TOKEN, request_bodies, &received_tokens, &received_signatures](
+			http::ExpectedIncomingRequestPtr exp_req) {
+			ASSERT_TRUE(exp_req) << exp_req.error().String();
+
+			auto signature = exp_req.value()->GetHeader("X-MEN-Signature");
+			ASSERT_TRUE(signature) << signature.error().String();
+			received_signatures.push_back(signature.value());
+
+			const auto &body_bytes = *request_bodies->back();
+			auto expected_json = json::Load(string(body_bytes.begin(), body_bytes.end()));
+			ASSERT_TRUE(expected_json) << expected_json.error().String();
+			auto tenant_token = expected_json.value().Get("tenant_token");
+			ASSERT_TRUE(tenant_token) << "tenant_token field not found in request";
+			auto tenant_token_string = tenant_token.value().GetString();
+			ASSERT_TRUE(tenant_token_string) << "tenant_token field is not a string";
+			received_tokens.push_back(tenant_token_string.value());
+
+			auto result = exp_req.value()->MakeResponse();
+			ASSERT_TRUE(result);
+			auto resp = result.value();
+
+			if (tenant_token_string.value() == "tenant_b") {
+				resp->SetStatusCodeAndMessage(200, "OK");
+				resp->SetBodyReader(make_shared<io::StringReader>(JWT_TOKEN));
+				resp->SetHeader("Content-Length", to_string(JWT_TOKEN.size()));
+			} else {
+				const string err_response_data =
+					R"({"error": "Unauthorized", "response-id": "some id here"})";
+				resp->SetStatusCodeAndMessage(401, "Unauthorized");
+				resp->SetBodyReader(make_shared<io::StringReader>(err_response_data));
+				resp->SetHeader("Content-Length", to_string(err_response_data.size()));
+			}
+			resp->AsyncReply([](error::Error err) { ASSERT_EQ(error::NoError, err); });
+		});
+
+	string private_key_path = "./private_key.pem";
+
+	string server_certificate_path {};
+	http::ClientConfig client_config {server_certificate_path};
+	http::Client client {client_config, loop};
+
+	// The first entry overrides the global tenant token, the second one uses it.
+	vector<config_parser::Server> servers {{server_url, "tenant_a"}, {server_url, ""}};
+	auth::APIResponseHandler handle_jwt_token_callback =
+		[&loop, JWT_TOKEN, server_url](auth::APIResponse resp) {
+			ASSERT_TRUE(resp);
+			EXPECT_EQ(resp.value().token, JWT_TOKEN);
+			EXPECT_EQ(resp.value().server_url, server_url);
+			loop.Stop();
+		};
+	auto err = auth::FetchJWTToken(
+		client,
+		servers,
+		{private_key_path},
+		test_device_identity_script,
+		handle_jwt_token_callback,
+		"tenant_b");
+
+	loop.Run();
+
+	ASSERT_EQ(err, error::NoError) << "Unexpected error: " << err.message;
+	EXPECT_THAT(received_tokens, ::testing::ElementsAre("tenant_a", "tenant_b"));
+	// Different bodies, so every server must get its own signature.
+	ASSERT_EQ(received_signatures.size(), 2);
+	EXPECT_NE(received_signatures[0], received_signatures[1]);
 }
 
 TEST_F(AuthTests, FetchJWTTokenWithMicroTier) {
@@ -295,7 +385,7 @@ TEST_F(AuthTests, FetchJWTTokenWithMicroTier) {
 	http::ClientConfig client_config {server_certificate_path};
 	http::Client client {client_config, loop};
 
-	vector<string> servers {server_url};
+	vector<config_parser::Server> servers {{server_url, ""}};
 	auth::APIResponseHandler handle_jwt_token_callback = [&loop](auth::APIResponse resp) {
 		ASSERT_TRUE(resp);
 		loop.Stop();
@@ -362,7 +452,7 @@ TEST_F(AuthTests, FetchJWTTokenWithStandardTier) {
 	http::ClientConfig client_config {server_certificate_path};
 	http::Client client {client_config, loop};
 
-	vector<string> servers {server_url};
+	vector<config_parser::Server> servers {{server_url, ""}};
 	auth::APIResponseHandler handle_jwt_token_callback = [&loop](auth::APIResponse resp) {
 		ASSERT_TRUE(resp);
 		loop.Stop();
@@ -429,7 +519,7 @@ TEST_F(AuthTests, FetchJWTTokenDefaultTier) {
 	http::ClientConfig client_config {server_certificate_path};
 	http::Client client {client_config, loop};
 
-	vector<string> servers {server_url};
+	vector<config_parser::Server> servers {{server_url, ""}};
 	auth::APIResponseHandler handle_jwt_token_callback = [&loop](auth::APIResponse resp) {
 		ASSERT_TRUE(resp);
 		loop.Stop();

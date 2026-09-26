@@ -158,7 +158,7 @@ echo ID=ABC
 			[&tmpdir](context::MenderContext &ctx) {
 				ctx.GetConfig().paths.SetPathConfDir(tmpdir.Path());
 				ctx.GetConfig().paths.SetPathDataDir(tmpdir.Path());
-				ctx.GetConfig().servers.push_back("http://127.0.0.1:" + TEST_PORT);
+				ctx.GetConfig().servers.push_back({"http://127.0.0.1:" + TEST_PORT, ""});
 			}),
 		0);
 

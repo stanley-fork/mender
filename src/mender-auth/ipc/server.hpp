@@ -38,6 +38,7 @@ namespace ipc {
 using namespace std;
 
 namespace conf = mender::client_shared::conf;
+namespace cfg_parser = mender::client_shared::config_parser;
 namespace crypto = mender::common::crypto;
 namespace dbus = mender::common::dbus;
 namespace error = mender::common::error;
@@ -90,7 +91,7 @@ private:
 	string cached_server_url_;
 	bool auth_in_progress_ = false;
 
-	const vector<string> &servers_;
+	const vector<cfg_parser::Server> &servers_;
 	const string tenant_token_;
 	const string device_tier_;
 	http::Client client_;
